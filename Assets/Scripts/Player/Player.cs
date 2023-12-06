@@ -60,8 +60,6 @@ public class Player : MonoBehaviour
             playerRotate(movementDirection);
         }
        
-
-        /*
         if (movementDirection.magnitude == 0)
         {
             currentSpeed = 0f;
@@ -93,17 +91,17 @@ public class Player : MonoBehaviour
         }
         playerVelocity.y -= gravity*Time.deltaTime;
         controller.Move(playerVelocity * Time.deltaTime);
-        */
     }    
 
     public void playerRotate(Vector3 targetDirection)
     {
-        Quaternion rotationToDo = Quaternion.FromToRotation(transform.forward, targetDirection);
-        if(rotationToDo != Quaternion.identity)
+        float angleToRotate = Quaternion.FromToRotation(transform.forward, targetDirection).eulerAngles.y;
+        if(angleToRotate > 180)
         {
-            Quaternion.Lerp(transform.rotation, rotationToDo, Time.deltaTime * rotationSpeed); 
+            angleToRotate -= 360f;
         }
-            
+        Debug.Log(angleToRotate);
+        transform.Rotate(Vector3.up, angleToRotate * Time.deltaTime * rotationSpeed);                 
     }
 
     public void setAnimation()
