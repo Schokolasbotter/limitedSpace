@@ -21,8 +21,7 @@ public class Player : MonoBehaviour
     public float jumpHeight = 5f;
     private Vector3 jumpDirection = Vector3.zero;
     private float gravity = 9.81f;
-    private bool isGrounded = false;
-    private Vector3 directionTarget;
+    public bool isGrounded = false;
     public float rotationSpeed = 3f;
 
     private void Start()
@@ -48,6 +47,8 @@ public class Player : MonoBehaviour
     public void playerMove() {
         // Get Values
         isGrounded = controller.isGrounded;
+        animator.SetBool("Grounded", isGrounded);
+
         inputVector = inputManager.movementVector;
         isRunning = inputManager.isRunning;
 
@@ -82,7 +83,7 @@ public class Player : MonoBehaviour
         }
         else
         {
-            controller.Move(jumpDirection* currentSpeed * Time.deltaTime);
+            controller.Move(jumpDirection * currentSpeed * Time.deltaTime);
         }
         //Vertical
         if (isGrounded && playerVelocity.y <= 0f)
@@ -100,7 +101,6 @@ public class Player : MonoBehaviour
         {
             angleToRotate -= 360f;
         }
-        Debug.Log(angleToRotate);
         transform.Rotate(Vector3.up, angleToRotate * Time.deltaTime * rotationSpeed);                 
     }
 
@@ -115,8 +115,10 @@ public class Player : MonoBehaviour
     {
         if (isGrounded)
         {
+            Debug.Log("Test");
+            animator.SetTrigger("Jump");
             playerVelocity.y += Mathf.Sqrt(jumpHeight * gravity);
-            jumpDirection = Vector3.forward * inputVector.y + Vector3.right * inputVector.x;
+            jumpDirection = playerCamera.transform.forward * inputVector.y + playerCamera.transform.right * inputVector.x;
         }
     }
 
