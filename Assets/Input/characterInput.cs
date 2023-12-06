@@ -55,7 +55,7 @@ public partial class @CharacterInput: IInputActionCollection2, IDisposable
                     ""initialStateCheck"": false
                 },
                 {
-                    ""name"": ""Camera Move"",
+                    ""name"": ""Look"",
                     ""type"": ""Value"",
                     ""id"": ""b3f33929-4b7a-40c4-8248-aaa1a93490e9"",
                     ""expectedControlType"": ""Vector2"",
@@ -149,7 +149,7 @@ public partial class @CharacterInput: IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""Camera Move"",
+                    ""action"": ""Look"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -163,7 +163,7 @@ public partial class @CharacterInput: IInputActionCollection2, IDisposable
         m_Character_Move = m_Character.FindAction("Move", throwIfNotFound: true);
         m_Character_Jump = m_Character.FindAction("Jump", throwIfNotFound: true);
         m_Character_Run = m_Character.FindAction("Run", throwIfNotFound: true);
-        m_Character_CameraMove = m_Character.FindAction("Camera Move", throwIfNotFound: true);
+        m_Character_Look = m_Character.FindAction("Look", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -228,7 +228,7 @@ public partial class @CharacterInput: IInputActionCollection2, IDisposable
     private readonly InputAction m_Character_Move;
     private readonly InputAction m_Character_Jump;
     private readonly InputAction m_Character_Run;
-    private readonly InputAction m_Character_CameraMove;
+    private readonly InputAction m_Character_Look;
     public struct CharacterActions
     {
         private @CharacterInput m_Wrapper;
@@ -236,7 +236,7 @@ public partial class @CharacterInput: IInputActionCollection2, IDisposable
         public InputAction @Move => m_Wrapper.m_Character_Move;
         public InputAction @Jump => m_Wrapper.m_Character_Jump;
         public InputAction @Run => m_Wrapper.m_Character_Run;
-        public InputAction @CameraMove => m_Wrapper.m_Character_CameraMove;
+        public InputAction @Look => m_Wrapper.m_Character_Look;
         public InputActionMap Get() { return m_Wrapper.m_Character; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -255,9 +255,9 @@ public partial class @CharacterInput: IInputActionCollection2, IDisposable
             @Run.started += instance.OnRun;
             @Run.performed += instance.OnRun;
             @Run.canceled += instance.OnRun;
-            @CameraMove.started += instance.OnCameraMove;
-            @CameraMove.performed += instance.OnCameraMove;
-            @CameraMove.canceled += instance.OnCameraMove;
+            @Look.started += instance.OnLook;
+            @Look.performed += instance.OnLook;
+            @Look.canceled += instance.OnLook;
         }
 
         private void UnregisterCallbacks(ICharacterActions instance)
@@ -271,9 +271,9 @@ public partial class @CharacterInput: IInputActionCollection2, IDisposable
             @Run.started -= instance.OnRun;
             @Run.performed -= instance.OnRun;
             @Run.canceled -= instance.OnRun;
-            @CameraMove.started -= instance.OnCameraMove;
-            @CameraMove.performed -= instance.OnCameraMove;
-            @CameraMove.canceled -= instance.OnCameraMove;
+            @Look.started -= instance.OnLook;
+            @Look.performed -= instance.OnLook;
+            @Look.canceled -= instance.OnLook;
         }
 
         public void RemoveCallbacks(ICharacterActions instance)
@@ -296,6 +296,6 @@ public partial class @CharacterInput: IInputActionCollection2, IDisposable
         void OnMove(InputAction.CallbackContext context);
         void OnJump(InputAction.CallbackContext context);
         void OnRun(InputAction.CallbackContext context);
-        void OnCameraMove(InputAction.CallbackContext context);
+        void OnLook(InputAction.CallbackContext context);
     }
 }

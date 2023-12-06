@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
+using Unity.VisualScripting.InputSystem;
 using UnityEngine;
 
 public class Player : MonoBehaviour
@@ -8,9 +9,10 @@ public class Player : MonoBehaviour
     private inputManager inputManager;
     private CharacterController controller;
     private Animator animator;
+    private Camera playerCamera;
 
     [Header("Movement Variables")]
-    private Vector2 movementVector = Vector2.zero;
+    private Vector2 inputVector = Vector2.zero;
     private Vector3 playerVelocity = Vector3.zero;
     public float walkSpeed = 3f;
     public float runSpeed = 6f;
@@ -18,8 +20,10 @@ public class Player : MonoBehaviour
     private bool isRunning;
     public float jumpHeight = 5f;
     private Vector3 jumpDirection = Vector3.zero;
-    public float gravity = 9.81f;
-    public bool isGrounded = false;
+    private float gravity = 9.81f;
+    private bool isGrounded = false;
+    private Vector3 directionTarget;
+    public float rotationSpeed = 3f;
 
     private void Start()
     {
@@ -27,6 +31,7 @@ public class Player : MonoBehaviour
         inputManager = FindObjectOfType<inputManager>();
         controller = GetComponent<CharacterController>();
         animator = GetComponentInChildren<Animator>();
+        playerCamera = Camera.main;
         //Subscribe To Input Events
         inputManager.OnJump.AddListener(playerJump);
     }
@@ -35,6 +40,7 @@ public class Player : MonoBehaviour
     {
         //Player Movement
         playerMove();
+        //playerRotate();
         //Animation
         setAnimation();
     }
@@ -42,11 +48,21 @@ public class Player : MonoBehaviour
     public void playerMove() {
         // Get Values
         isGrounded = controller.isGrounded;
-        movementVector = inputManager.movementVector;
+        inputVector = inputManager.movementVector;
         isRunning = inputManager.isRunning;
-        //Horizontal
-        Vector3 movementDirection = Vector3.forward * movementVector.y + Vector3.right * movementVector.x;
-        if (movementDirection.magnitude == 0f)
+
+        //Get Direction
+        Vector3 movementDirection = playerCamera.transform.forward * inputVector.y + playerCamera.transform.right * inputVector.x;
+        movementDirection.y = 0;
+        //Rotate into direction
+        if (movementDirection.magnitude != 0)
+        {            
+            playerRotate(movementDirection);
+        }
+       
+
+        /*
+        if (movementDirection.magnitude == 0)
         {
             currentSpeed = 0f;
         }
@@ -77,11 +93,23 @@ public class Player : MonoBehaviour
         }
         playerVelocity.y -= gravity*Time.deltaTime;
         controller.Move(playerVelocity * Time.deltaTime);
+        */
     }    
+
+    public void playerRotate(Vector3 targetDirection)
+    {
+        Quaternion rotationToDo = Quaternion.FromToRotation(transform.forward, targetDirection);
+        if(rotationToDo != Quaternion.identity)
+        {
+            Quaternion.Lerp(transform.rotation, rotationToDo, Time.deltaTime * rotationSpeed); 
+        }
+            
+    }
 
     public void setAnimation()
     {
-        animator.SetFloat("RunningSpeed", currentSpeed, 0.1f, Time.deltaTime);
+        animator.SetFloat("zSpeed", inputManager.movementVector.y * currentSpeed, 0.1f, Time.deltaTime);
+        animator.SetFloat("xSpeed", inputManager.movementVector.x * currentSpeed, 0.1f, Time.deltaTime);
     }
 
     //Input Functions
@@ -90,7 +118,7 @@ public class Player : MonoBehaviour
         if (isGrounded)
         {
             playerVelocity.y += Mathf.Sqrt(jumpHeight * gravity);
-            jumpDirection = Vector3.forward * movementVector.y + Vector3.right * movementVector.x;
+            jumpDirection = Vector3.forward * inputVector.y + Vector3.right * inputVector.x;
         }
     }
 

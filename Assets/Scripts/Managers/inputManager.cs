@@ -17,7 +17,7 @@ public class inputManager : MonoBehaviour
 
     public Vector2 movementVector;
     public bool isRunning;
-    public Vector2 cameraMoveVector;
+    public Vector2 lookVector;
 
     private void Awake()
     {
@@ -36,14 +36,12 @@ public class inputManager : MonoBehaviour
         movementInput();
         jumpInput();
         runInput();
-        cameraMoveInput();
-        
+        lookInput();        
     }
 
     private void movementInput()
     {
-        movementVector = characterInput.Character.Move.ReadValue<Vector2>();
-        
+        movementVector = characterInput.Character.Move.ReadValue<Vector2>();        
     }
 
     private void jumpInput()
@@ -56,9 +54,9 @@ public class inputManager : MonoBehaviour
         isRunning = (characterInput.Character.Run.IsInProgress())?true:false;
     }
 
-    private void cameraMoveInput()
+    private void lookInput()
     {
-        cameraMoveVector = characterInput.Character.CameraMove.ReadValue<Vector2>();
+        lookVector = characterInput.Character.Look.ReadValue<Vector2>();
     }
 
     private void OnEnable()
