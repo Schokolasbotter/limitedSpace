@@ -24,6 +24,7 @@ public class Player : MonoBehaviour
     public bool isGrounded = false;
     public float checkGroundedHeight;
     public float rotationSpeed = 3f;
+    public LayerMask groundMask;
 
     private void Awake()
     {
@@ -121,7 +122,7 @@ public class Player : MonoBehaviour
     
     private void checkGround()
     {
-       isGrounded = Physics.CheckBox(transform.position + Vector3.up * checkGroundedHeight,new Vector3(controller.radius,0.1f, controller.radius),Quaternion.identity);
+       isGrounded = Physics.CheckBox(transform.position + Vector3.up * checkGroundedHeight,new Vector3(controller.radius,0.1f, controller.radius),Quaternion.identity,groundMask);
     }
     public void playerJump()
     {
