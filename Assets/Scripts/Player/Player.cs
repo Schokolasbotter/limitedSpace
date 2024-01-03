@@ -6,8 +6,8 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
-    private inputManager inputManager;
-    private CharacterController controller;
+    private CharacterInput characterInput;
+    public CharacterController controller;
     private Animator animator;
     private Camera playerCamera;
 
@@ -22,35 +22,44 @@ public class Player : MonoBehaviour
     private Vector3 jumpDirection = Vector3.zero;
     private float gravity = 9.81f;
     public bool isGrounded = false;
+    public float checkGroundedHeight;
     public float rotationSpeed = 3f;
+
+    private void Awake()
+    {
+        characterInput = new CharacterInput();
+    }
 
     private void Start()
     {
         //Get Components
-        inputManager = FindObjectOfType<inputManager>();
         controller = GetComponent<CharacterController>();
         animator = GetComponentInChildren<Animator>();
         playerCamera = Camera.main;
-        //Subscribe To Input Events
-        inputManager.OnJump.AddListener(playerJump);
     }
 
     private void Update()
     {
         //Player Movement
         playerMove();
-        //playerRotate();
         //Animation
         setAnimation();
     }
 
     public void playerMove() {
         // Get Values
-        isGrounded = controller.isGrounded;
+        checkGround();
         animator.SetBool("Grounded", isGrounded);
 
-        inputVector = inputManager.movementVector;
-        isRunning = inputManager.isRunning;
+        inputVector = characterInput.Character.Move.ReadValue<Vector2>();
+        isRunning = characterInput.Character.Run.IsInProgress();
+
+        //Jump
+        if (characterInput.Character.Jump.WasPerformedThisFrame())
+        {
+            playerJump();
+
+        }
 
         //Get Direction
         Vector3 movementDirection = playerCamera.transform.forward * inputVector.y + playerCamera.transform.right * inputVector.x;
@@ -106,27 +115,38 @@ public class Player : MonoBehaviour
 
     public void setAnimation()
     {
-        animator.SetFloat("zSpeed", inputManager.movementVector.y * currentSpeed, 0.1f, Time.deltaTime);
-        animator.SetFloat("xSpeed", inputManager.movementVector.x * currentSpeed, 0.1f, Time.deltaTime);
+        animator.SetFloat("zSpeed", inputVector.y * currentSpeed, 0.1f, Time.deltaTime);
+        animator.SetFloat("xSpeed", inputVector.x * currentSpeed, 0.1f, Time.deltaTime);
     }
-
-    //Input Functions
+    
+    private void checkGround()
+    {
+       isGrounded = Physics.CheckBox(transform.position + Vector3.up * checkGroundedHeight,new Vector3(controller.radius,0.1f, controller.radius),Quaternion.identity);
+    }
     public void playerJump()
     {
         if (isGrounded)
         {
-            Debug.Log("Test");
             animator.SetTrigger("Jump");
-            playerVelocity.y += Mathf.Sqrt(jumpHeight * gravity);
+            playerVelocity.y += Mathf.Sqrt(jumpHeight * gravity );
             jumpDirection = playerCamera.transform.forward * inputVector.y + playerCamera.transform.right * inputVector.x;
         }
     }
 
-    public void playerRun()
+
+    private void OnEnable()
     {
-        if (isGrounded)
-        {
-            isRunning = true;
-        }
+        characterInput.Enable();
+    }
+
+    private void OnDisable()
+    {
+        characterInput.Disable();
+    }
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.red;
+        Gizmos.DrawCube(transform.position+ Vector3.up* checkGroundedHeight, new Vector3(controller.radius*2, 0.2f, controller.radius*2));
     }
 }
