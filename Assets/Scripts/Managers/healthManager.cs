@@ -9,6 +9,7 @@ using UnityEngine.UI;
 public class healthManager : MonoBehaviour
 {
     public float health, maxHealth, timer;
+    public int difficultyLevel = 1;
 
     [Header("UI")]
     public Slider sliderR;
@@ -17,20 +18,24 @@ public class healthManager : MonoBehaviour
 
     private void Start()
     {
+        health = maxHealth;
         sliderR.maxValue = maxHealth;
         sliderL.maxValue = maxHealth;
         SetHealthBar();
     }
     private void Update()
     {
-        health -= Time.deltaTime;
+        health -= difficultyLevel * Time.deltaTime;
         SetHealthBar();
         timer +=Time.deltaTime;
+        difficultyLevel = 1 + Mathf.FloorToInt(timer / 60f);
         SetTimer();
 
         if(health <= 0)
         {
             //Game Over
+            FindAnyObjectByType<Player>().PlayDeathAnimation();
+            StartCoroutine(FindAnyObjectByType<GameManager>().EndGame());
         }
     }
 

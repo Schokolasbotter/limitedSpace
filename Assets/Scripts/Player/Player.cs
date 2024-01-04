@@ -3,28 +3,39 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using Unity.VisualScripting.InputSystem;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Player : MonoBehaviour
 {
-    private CharacterInput characterInput;
+    [Header("References")]
     public CharacterController controller;
+    private CharacterInput characterInput;
     private Animator animator;
     private Camera playerCamera;
+    private AudioSource playerAudioSource;
+    public GameObject ovalObject;
 
     [Header("Movement Variables")]
-    private Vector2 inputVector = Vector2.zero;
-    private Vector3 playerVelocity = Vector3.zero;
     public float walkSpeed = 3f;
     public float runSpeed = 6f;
-    private float currentSpeed = 0f;
-    private bool isRunning;
     public float jumpHeight = 5f;
-    private Vector3 jumpDirection = Vector3.zero;
-    private float gravity = 9.81f;
     public bool isGrounded = false;
     public float checkGroundedHeight;
     public float rotationSpeed = 3f;
     public LayerMask groundMask;
+
+    private Vector2 inputVector = Vector2.zero;
+    private Vector3 playerVelocity = Vector3.zero;
+    private float currentSpeed = 0f;
+    private bool isRunning;
+    private Vector3 jumpDirection = Vector3.zero;
+    private float gravity = 9.81f;
+    private bool isOutside = false;
+    private Vector3 outsidePosition;
+
+    [Header("AudioClips")]
+    public AudioClip runningClip;
+    public AudioClip walkingClip;
 
     private void Awake()
     {
@@ -36,6 +47,7 @@ public class Player : MonoBehaviour
         //Get Components
         controller = GetComponent<CharacterController>();
         animator = GetComponentInChildren<Animator>();
+        playerAudioSource = GetComponent<AudioSource>();
         playerCamera = Camera.main;
     }
 
@@ -48,12 +60,21 @@ public class Player : MonoBehaviour
     }
 
     public void playerMove() {
+
         // Get Values
         checkGround();
         animator.SetBool("Grounded", isGrounded);
 
         inputVector = characterInput.Character.Move.ReadValue<Vector2>();
         isRunning = characterInput.Character.Run.IsInProgress();
+
+        //UI Oval
+        if (isOutside)
+        {
+            float distance = (transform.position - outsidePosition).magnitude;
+            Debug.Log("Setting Alpha to: " + distance);
+            adjustOvalAlpha(Mathf.InverseLerp(0, 50f, distance));
+        }
 
         //Jump
         if (characterInput.Character.Jump.WasPerformedThisFrame())
@@ -80,10 +101,12 @@ public class Player : MonoBehaviour
             if (isRunning)
             {
                 currentSpeed = runSpeed;
+                setAudioClip(runningClip);
             }
             else
             {
                 currentSpeed = walkSpeed;
+                setAudioClip(walkingClip);
             }
         }
 
@@ -95,12 +118,23 @@ public class Player : MonoBehaviour
         {
             controller.Move(jumpDirection * currentSpeed * Time.deltaTime);
         }
+        //Audio
+        if (movementDirection.magnitude != 0 && isGrounded && !playerAudioSource.isPlaying)
+        {
+            PlayAudio();
+        }
+        else if (movementDirection.magnitude == 0 || !isGrounded)
+        {
+            StopAudio();
+        }
+
         //Vertical
         if (isGrounded && playerVelocity.y <= 0f)
         {
             playerVelocity.y = 0f;
         }
         playerVelocity.y -= gravity*Time.deltaTime;
+
         controller.Move(playerVelocity * Time.deltaTime);
     }    
 
@@ -134,6 +168,32 @@ public class Player : MonoBehaviour
         }
     }
 
+    public void PlayDeathAnimation()
+    {
+        animator.SetTrigger("GameOver");
+    }
+
+    private void setAudioClip(AudioClip audioClip)
+    {
+        playerAudioSource.clip = audioClip;
+    }
+
+    private void PlayAudio()
+    {
+        playerAudioSource.Play();
+    }
+
+    private void StopAudio()
+    {
+        playerAudioSource.Stop();
+    }
+
+    private void adjustOvalAlpha(float alpha)
+    {
+        Color newColor = ovalObject.GetComponent<Image>().color;
+        newColor.a = alpha;
+        ovalObject.GetComponent<Image>().color = newColor;
+    }
 
     private void OnEnable()
     {
@@ -149,5 +209,24 @@ public class Player : MonoBehaviour
     {
         Gizmos.color = Color.red;
         Gizmos.DrawCube(transform.position+ Vector3.up* checkGroundedHeight, new Vector3(controller.radius*2, 0.2f, controller.radius*2));
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if(other.tag == "Limit")
+        {
+            outsidePosition = transform.position;
+            isOutside = true;
+        }
+    }
+
+    private void OnTriggerStay(Collider other)
+    {
+        if (other.tag == "Limit")
+        {
+            adjustOvalAlpha(0f);
+            Debug.Log("Inside");
+            isOutside = false;
+        }
     }
 }
