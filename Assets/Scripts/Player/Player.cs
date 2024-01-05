@@ -14,6 +14,7 @@ public class Player : MonoBehaviour
     private Camera playerCamera;
     private AudioSource playerAudioSource;
     public GameObject ovalObject;
+    public AudioSource screechAudioSource;
 
     [Header("Movement Variables")]
     public float walkSpeed = 3f;
@@ -23,6 +24,8 @@ public class Player : MonoBehaviour
     public float checkGroundedHeight;
     public float rotationSpeed = 3f;
     public LayerMask groundMask;
+    public float outsideDamageTime = 1;
+    public float outsideDamage = 2;
 
     private Vector2 inputVector = Vector2.zero;
     private Vector3 playerVelocity = Vector3.zero;
@@ -32,6 +35,8 @@ public class Player : MonoBehaviour
     private float gravity = 9.81f;
     private bool isOutside = false;
     private Vector3 outsidePosition;
+    private float outsideTimer;
+    private int outsideDamageCount = 1;
 
     [Header("AudioClips")]
     public AudioClip runningClip;
@@ -71,8 +76,15 @@ public class Player : MonoBehaviour
         //UI Oval
         if (isOutside)
         {
+            Debug.Log(outsideTimer);
+            outsideTimer -= Time.deltaTime;
+            if(outsideTimer <= 0f)
+            {
+                FindFirstObjectByType<healthManager>().DecreaseHealth(outsideDamageCount * outsideDamage);
+                outsideDamageCount++;
+                outsideTimer = outsideDamageTime;
+            }
             float distance = (transform.position - outsidePosition).magnitude;
-            Debug.Log("Setting Alpha to: " + distance);
             adjustOvalAlpha(Mathf.InverseLerp(0, 50f, distance));
         }
 
@@ -215,7 +227,9 @@ public class Player : MonoBehaviour
     {
         if(other.tag == "Limit")
         {
+            screechAudioSource.Play();
             outsidePosition = transform.position;
+            outsideTimer = outsideDamageTime;
             isOutside = true;
         }
     }
@@ -224,9 +238,10 @@ public class Player : MonoBehaviour
     {
         if (other.tag == "Limit")
         {
+            screechAudioSource.Stop();
             adjustOvalAlpha(0f);
-            Debug.Log("Inside");
             isOutside = false;
+            outsideDamageCount = 0;
         }
     }
 }

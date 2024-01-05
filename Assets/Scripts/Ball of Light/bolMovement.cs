@@ -16,7 +16,10 @@ public class bolMovement : MonoBehaviour
 
     void Update()
     {
-        transform.position = new Vector3(transform.position.x,originPoint.y + range*Mathf.Sin(Time.time),transform.position.z);
+        float x = originPoint.x + range * Mathf.Cos(Time.deltaTime + 99f);
+        float y = originPoint.y + range * Mathf.Sin(Time.time);
+        float z = originPoint.z + range * Mathf.Sin(Time.time - 65.5f);
+        transform.position = new Vector3(x,y,z);
         energy -= Time.deltaTime;
     }
 

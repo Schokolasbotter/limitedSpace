@@ -27,6 +27,8 @@ public class healthManager : MonoBehaviour
     {
         health -= difficultyLevel * Time.deltaTime;
         SetHealthBar();
+        float i = Mathf.InverseLerp(0,100, health);
+        FindFirstObjectByType<roomScript>().SetColliderSize(i, i, i);
         timer +=Time.deltaTime;
         difficultyLevel = 1 + Mathf.FloorToInt(timer / 60f);
         SetTimer();
@@ -55,7 +57,12 @@ public class healthManager : MonoBehaviour
 
     public void IncreaseHealth(float amount)
     {
-        health = Mathf.Clamp(amount, 0, maxHealth);
+        health = Mathf.Clamp(health+amount, 0, maxHealth);
+    }
+
+    public void DecreaseHealth(float amount)
+    {
+        health = Mathf.Clamp(health-amount, 0, maxHealth);
     }
 
 }
