@@ -40,4 +40,14 @@ public class bolMovement : MonoBehaviour
             NewBallOfLight();
         }
     }
+
+    private void OnTriggerExit(Collider other)
+    {
+        Debug.Log(other.tag);
+        if(other.tag == "Limit")
+        {
+            Debug.Log("Test");
+            NewBallOfLight();
+        }
+    }
 }

@@ -183,6 +183,7 @@ public class Player : MonoBehaviour
     public void PlayDeathAnimation()
     {
         animator.SetTrigger("GameOver");
+        screechAudioSource.Stop();
     }
 
     private void setAudioClip(AudioClip audioClip)

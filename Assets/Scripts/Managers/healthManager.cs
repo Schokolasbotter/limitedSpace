@@ -28,7 +28,7 @@ public class healthManager : MonoBehaviour
         health -= difficultyLevel * Time.deltaTime;
         SetHealthBar();
         float i = Mathf.InverseLerp(0,100, health);
-        FindFirstObjectByType<roomScript>().SetColliderSize(i, i, i);
+        FindFirstObjectByType<roomScript>().SetColliderSize(i, 1, i);
         timer +=Time.deltaTime;
         difficultyLevel = 1 + Mathf.FloorToInt(timer / 60f);
         SetTimer();
@@ -37,7 +37,7 @@ public class healthManager : MonoBehaviour
         {
             //Game Over
             FindAnyObjectByType<Player>().PlayDeathAnimation();
-            StartCoroutine(FindAnyObjectByType<GameManager>().EndGame());
+            StartCoroutine(FindAnyObjectByType<GameManager>().EndGame(timer));
         }
     }
 
