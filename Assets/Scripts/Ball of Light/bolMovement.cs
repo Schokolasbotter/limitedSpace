@@ -14,8 +14,9 @@ public class bolMovement : MonoBehaviour
         energy = maxEnergy;
     }
 
-    void Update()
+    void FixedUpdate()
     {
+        originPoint = transform.parent.transform.position;
         float x = originPoint.x + range * Mathf.Cos(Time.deltaTime + 99f);
         float y = originPoint.y + range * Mathf.Sin(Time.time);
         float z = originPoint.z + range * Mathf.Sin(Time.time - 65.5f);
@@ -43,10 +44,8 @@ public class bolMovement : MonoBehaviour
 
     private void OnTriggerExit(Collider other)
     {
-        Debug.Log(other.tag);
         if(other.tag == "Limit")
         {
-            Debug.Log("Test");
             NewBallOfLight();
         }
     }

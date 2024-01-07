@@ -76,7 +76,6 @@ public class Player : MonoBehaviour
         //UI Oval
         if (isOutside)
         {
-            Debug.Log(outsideTimer);
             outsideTimer -= Time.deltaTime;
             if(outsideTimer <= 0f)
             {
